@@ -20,12 +20,9 @@
 <script>
     ! function(window) {
         /**
-         *
          * @param option
          * @constructor
-         *
          */
-
         window.myEchars = function(option) {
             this.option = option
             this.parentEl = document.getElementById(option.el)
@@ -33,30 +30,26 @@
             this.cvs = document.createElement('canvas')
             this.cvs.width = this.parentEl.clientWidth
             this.cvs.height = this.parentEl.clientHeight
+            this.dataPointArr = []
             var me = this
             window.onresize = function() {
-                console.log("resize")
                 me.cvs.width = me.parentEl.clientWidth
                 me.cvs.height = me.parentEl.clientHeight
+                me.dataPointArr.length = 0
                 me.clear()
                 me[option.type] && me[option.type](option.data)
             }
             this.parentEl.innerHTML = ""
                 //这里添加到一个容器中去
             this.parentEl.appendChild(this.cvs)
-            this.cvs.ondblclick = function() {
-
-            }
+            this.cvs.ondblclick = function() {}
             this.ctx = this.cvs.getContext('2d')
                 //    this.timer = setInterval(function () {
                 //      this.clear()
                 //      this[option.type] && this[option.type](option.data)
-                //
                 //    }.bind(this),100)
             this[option.type] && this[option.type](option.data)
-
         }
-
         myEchars.prototype = {
             //折线图
             lineChart: function(data) {
@@ -94,13 +87,10 @@
                 ctx.lineTo(this.cvs.width * 0.9 + 5, this.cvs.height * 0.9 - 5)
                 ctx.lineTo(this.cvs.width * 0.9 + 5, this.cvs.height * 0.9)
                 ctx.fill()
-
-
-                //y 75%
-                //x 80%
-                //开始绘制标记
-                //保存当前绘制环境
-
+                    //y 75%
+                    //x 80%
+                    //开始绘制标记
+                    //保存当前绘制环境
                 ctx.save()
                 ctx.translate(this.cvs.width * 0.1, this.cvs.height * 0.9)
                     //开始绘制数据
@@ -110,33 +100,33 @@
                     var length = data.data.length
                     var lineY = this.cvs.height * 0.75
                     var lineX = this.cvs.width * 0.8
+                    var x = lineX * index / (length - 1)
+                    var y = -lineY * item / (data.yDataScope || 100)
                     if (!Object.is(Number(item), NaN)) {
-                        ctx.lineTo(lineX * index / (length - 1), -lineY * item / (data.yDataScope || 100))
+
+                        ctx.lineTo(x, y)
+                        this.dataPointArr.push({
+                            //存储每个数据的坐标
+                            x: x,
+                            y: y
+                        })
                     }
-                    console.log(item)
+                    //console.log(item)
                 }, this)
                 ctx.lineTo(this.cvs.width * 0.8, 0)
                 ctx.strokeStyle = data.lineStyle && data.lineStyle.color || "#000"
                     //ctx.fillStyle = 'rgba(0,0,255,0.5)'
                 var gradient = ctx.createLinearGradient(0, -this.cvs.height * 0.75, 0, 0)
-
                 gradient.addColorStop(1 / 4, 'red')
                 gradient.addColorStop(2 / 4, 'orange')
                 gradient.addColorStop(3 / 4, 'yellow')
                 gradient.addColorStop(4 / 4, 'gray')
-<<<<<<< HEAD
-=======
-                    //      gradient.addColorStop(4/7,'cyan')
-                    //      gradient.addColorStop(5/7,'blue')
-                    //      gradient.addColorStop(6/7,'purple')
-
-
->>>>>>> 7a0108ad13164c01ac93c9edc112e174b8f89a02
                 ctx.fillStyle = gradient
                 ctx.lineWidth = data.lineStyle && data.lineStyle.width || 2
                 ctx.lineJoin = "round"
                     //ctx.stroke()
                 ctx.fill()
+                this.point();
                 ctx.strokeStyle = "rgba(0,0,0,0.1)"
                 ctx.lineWidth = 1
                     //y标记
@@ -178,16 +168,25 @@
                 ctx.fillStyle = data.title && data.title.bigTitle && data.title.bigTitle.color || '#000'
                 ctx.fillText(data.title && data.title.bigTitle && data.title.bigTitle.text || "", this.cvs.width / 10, this.cvs.height / 10)
             },
+            //
+            point: function() {
+                this.ctx.fillStyle = "#FFF"
+                this.ctx.strokeStyle = "#000"
+                this.ctx.lineWidth = 1
+                this.dataPointArr.forEach(function(item, index) {
+                    this.ctx.beginPath()
+                    this.ctx.arc(item.x, item.y, 2, 0, 2 * Math.PI)
+                    this.ctx.fill()
+                    this.ctx.stroke()
+                }, this);
+                console.log(this.dataPointArr.length)
+            },
             //用来清除当前画布
             clear: function() {
                 this.ctx.clearRect(0, 0, this.cvs.width, this.cvs.height)
             }
         }
-
-
     }(window)
-
-
 
     new myEchars({
         el: 'test',
@@ -216,14 +215,15 @@
             },
             lineStyle: {
                 color: "green",
-                width: 2
+                width: 4,
+                drawPoint: true
             },
             yDataScope: 100,
             step: 10,
             data: (function() {
                 var arr = []
-                for (var i = 0; i < 97; i++) {
-                    arr.push(i + Math.random() * 20 | 0)
+                for (var i = 0; i < 50; i++) {
+                    arr.push(+Math.random() * 60 | 0)
                 }
                 return arr
             })()
