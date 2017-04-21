@@ -1,222 +1,254 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
-  <style>
-    #test{
-      width: 100%;
-      height:600px;
-      border:1px solid;
-    }
-  </style>
+    <style>
+        #test {
+            width: 100%;
+            height: 600px;
+            border: 1px solid;
+        }
+    </style>
 </head>
+
 <body>
-<div id="test"></div>
+    <div id="test"></div>
 
 
 </body>
 
 <script>
-!function (window) {
-  /**
-   *
-   * @param option
-   * @constructor
-   * option = {
-   * el:这个图表嵌入哪个元素中
-   * type：画什么图
-   * data : {
-   *  title: {
-   *    bigTitle:{
-   *      color:red
-   *      text :''
-   *    }
-   *    yTitle:""
-   *    xTitle:""
-   *  }
-   *  lineStyle:{
-   *    color:
-   *    width:
-   *  }
-   *  data: {
-   *
-   *  }
-   *
-   * }
-   *
-   * }
-   *
-   */
+    ! function(window) {
+        /**
+         *
+         * @param option
+         * @constructor
+         * option = {
+         * el:这个图表嵌入哪个元素中
+         * type：画什么图
+         * data : {
+         *  title: {
+         *    bigTitle:{
+         *      color:red
+         *      text :''
+         *    }
+         *    yTitle:""
+         *    xTitle:""
+         *  }
+         *  lineStyle:{
+         *    color:
+         *    width:
+         *  }
+         *  data: {
+         *
+         *  }
+         *
+         * }
+         *
+         * }
+         *
+         */
 
-  window.myEchars = function(option) {
-    this.option = option
-    this.parentEl = document.getElementById(option.el)
-    //这里创建一个canvas
-    this.cvs = document.createElement('canvas')
-    this.cvs.width = this.parentEl.clientWidth
-    this.cvs.height = this.parentEl.clientHeight
-    var me = this
-    window.onresize = function () {
-      console.log("resize")
-      me.cvs.width = me.parentEl.clientWidth
-      me.cvs.height = me.parentEl.clientHeight
-    }
-    this.parentEl.innerHTML = ""
-    //这里添加到一个容器中去
-    this.parentEl.appendChild(this.cvs)
-    this.cvs.ondblclick=function () {
+        window.myEchars = function(option) {
+            this.option = option
+            this.parentEl = document.getElementById(option.el)
+                //这里创建一个canvas
+            this.cvs = document.createElement('canvas')
+            this.cvs.width = this.parentEl.clientWidth
+            this.cvs.height = this.parentEl.clientHeight
+            var me = this
+            window.onresize = function() {
+                console.log("resize")
+                me.cvs.width = me.parentEl.clientWidth
+                me.cvs.height = me.parentEl.clientHeight
+                me.clear()
+                me[option.type] && me[option.type](option.data)
+            }
+            this.parentEl.innerHTML = ""
+                //这里添加到一个容器中去
+            this.parentEl.appendChild(this.cvs)
+            this.cvs.ondblclick = function() {
 
-    }
-    this.ctx = this.cvs.getContext('2d')
-//    this.timer = setInterval(function () {
-//      this.clear()
-//      this[option.type] && this[option.type](option.data)
-//
-//    }.bind(this),100)
-    this[option.type] && this[option.type](option.data)
+            }
+            this.ctx = this.cvs.getContext('2d')
+                //    this.timer = setInterval(function () {
+                //      this.clear()
+                //      this[option.type] && this[option.type](option.data)
+                //
+                //    }.bind(this),100)
+            this[option.type] && this[option.type](option.data)
 
-  }
-
-  myEchars.prototype = {
-    lineChart:function (data) {
-      //console.log('lineChart')
-      var ctx = this.ctx
-      //绘制大标题
-      ctx.textAlign="left"
-      ctx.font = "30px 微软雅黑"
-      ctx.fillStyle = data.title && data.title.bigTitle && data.title.bigTitle.color || '#000'
-      ctx.fillText(data.title && data.title.bigTitle && data.title.bigTitle.text || "", this.cvs.width/10,this.cvs.height/10)
-      //绘制X小标题
-      ctx.font = "18px 微软雅黑"
-      ctx.fillStyle = data.title && data.title.xTitle && data.title.xTitle.color || '#000'
-      ctx.fillText(data.title && data.title.xTitle && data.title.xTitle.text || "", this.cvs.width*0.11,this.cvs.height*0.17)
-      //绘制Y小标题
-
-      ctx.fillStyle = data.title && data.title.yTitle && data.title.yTitle.color || '#000'
-      ctx.fillText(data.title && data.title.yTitle && data.title.yTitle.text || "", this.cvs.width*0.91,this.cvs.height*0.91)
-      //绘制xy轴
-
-      ctx.beginPath()
-      ctx.strokeStyle = this.option.lineStyle&&this.option.lineStyle.color || "#000"
-      ctx.lineWidth = this.option.lineStyle&&this.option.lineStyle.width || 2
-      ctx.moveTo(this.cvs.width*0.1,this.cvs.height*0.15)
-      ctx.lineTo(this.cvs.width*0.1,this.cvs.height*0.9)
-      ctx.lineTo(this.cvs.width*0.9,this.cvs.height*0.9)
-      ctx.stroke()
-      //y 75%
-      //x 80%
-      //开始绘制标记
-      ctx.translate(this.cvs.width*0.1,this.cvs.height*0.9)
-
-
-      //开始绘制数据
-      ctx.beginPath()
-      ctx.moveTo(0,0)
-      data.data && data.data.forEach(function (item, index) {
-        var length = data.data.length
-        var lineY = this.cvs.height * 0.75
-        var lineX = this.cvs.width * 0.8
-        if (!Object.is(Number(item),NaN)) {
-            ctx.lineTo(lineX * index/(length-1), -lineY * item/(data.yDataScope || 100))
         }
-        console.log(item)
-      },this)
-      ctx.lineTo(this.cvs.width*0.8,0)
-      ctx.strokeStyle = data.lineStyle && data.lineStyle.color || "#000"
-      //ctx.fillStyle = 'rgba(0,0,255,0.5)'
-      var gradient = ctx.createLinearGradient(0,-this.cvs.height*0.75, 0, 0)
 
-      gradient.addColorStop(1/4,'red')
-      gradient.addColorStop(2/4,'orange')
-      gradient.addColorStop(3/4,'yellow')
-      gradient.addColorStop(4/4,'green')
-//      gradient.addColorStop(4/7,'cyan')
-//      gradient.addColorStop(5/7,'blue')
-//      gradient.addColorStop(6/7,'purple')
+        myEchars.prototype = {
+            //折线图
+            lineChart: function(data) {
+                //console.log('lineChart')
+                var ctx = this.ctx
+                    //绘制大标题
+                this.drawBigTitle(ctx, data)
+                    //绘制X小标题
+                ctx.font = "18px 微软雅黑"
+                ctx.fillStyle = data.title && data.title.xTitle && data.title.xTitle.color || '#000'
+                ctx.fillText(data.title && data.title.xTitle && data.title.xTitle.text || "", this.cvs.width * 0.11, this.cvs.height * 0.17)
+                    //绘制Y小标题
 
+                ctx.fillStyle = data.title && data.title.yTitle && data.title.yTitle.color || '#000'
+                ctx.fillText(data.title && data.title.yTitle && data.title.yTitle.text || "", this.cvs.width * 0.91, this.cvs.height * 0.91)
 
-      ctx.fillStyle = gradient
-      ctx.lineWidth = data.lineStyle && data.lineStyle.width || 2
-      ctx.lineJoin="round"
-      //ctx.stroke()
-      ctx.fill()
+                //绘制xy轴
+                ctx.beginPath()
+                ctx.strokeStyle = this.option.lineStyle && this.option.lineStyle.color || "#000"
+                ctx.lineWidth = this.option.lineStyle && this.option.lineStyle.width || 2
+                ctx.moveTo(this.cvs.width * 0.1, this.cvs.height * 0.15)
+                ctx.lineTo(this.cvs.width * 0.1, this.cvs.height * 0.9)
+                ctx.lineTo(this.cvs.width * 0.9 + 5, this.cvs.height * 0.9)
+                ctx.stroke()
 
-      ctx.strokeStyle="rgba(0,0,0,0.1)"
-      ctx.lineWidth=1
-      //y标记
-      data.title && data.title.xTitle && data.title.xTitle.mark.forEach(function (item,index) {
-        var length = data.title.xTitle.mark.length
-        ctx.beginPath()
-        ctx.textAlign="right"
-        ctx.fillText(item,-5,-this.cvs.height * 0.75 / (length-1) *index)
-        ctx.moveTo(0,-this.cvs.height * 0.75 / (length-1) *index)
-        ctx.lineTo(this.cvs.width*0.8,-this.cvs.height * 0.75 / (length-1) *index)
-        ctx.stroke()
-      },this)
-      //x标记
-      data.title && data.title.yTitle && data.title.yTitle.mark.forEach(function (item,index) {
-        var length = data.title.yTitle.mark.length
-        ctx.beginPath()
-        ctx.textAlign="left"
-        ctx.fillText(item,this.cvs.width * 0.8 / ( length-1) * index - 8,25)
-        ctx.moveTo(this.cvs.width*0.8 / (length-1) * index, 0)
-        ctx.lineTo(this.cvs.width*0.8 / (length-1) * index, -this.cvs.height * 0.8 )
-        ctx.stroke()
-      },this)
-
-      ctx.translate(-this.cvs.width*0.1,-this.cvs.height*0.9)
-    },
-    clear :function () {
-      this.ctx.clearRect(0,0,this.cvs.width,this.cvs.height)
-    }
-  }
+                //上尖尖
+                ctx.beginPath()
+                ctx.fillStyle = this.option.lineStyle && this.option.lineStyle.color || "#000"
+                ctx.lineTo(this.cvs.width * 0.1 - 5, this.cvs.height * 0.15)
+                ctx.lineTo(this.cvs.width * 0.1, this.cvs.height * 0.15 - 15)
+                ctx.lineTo(this.cvs.width * 0.1 + 5, this.cvs.height * 0.15)
+                ctx.lineTo(this.cvs.width * 0.1, this.cvs.height * 0.15)
+                ctx.fill()
+                    //右尖尖
+                ctx.beginPath()
+                ctx.moveTo(this.cvs.width * 0.9 + 5, this.cvs.height * 0.9 + 5)
+                ctx.lineTo(this.cvs.width * 0.9 + 20, this.cvs.height * 0.9)
+                ctx.lineTo(this.cvs.width * 0.9 + 5, this.cvs.height * 0.9 - 5)
+                ctx.lineTo(this.cvs.width * 0.9 + 5, this.cvs.height * 0.9)
+                ctx.fill()
 
 
-}(window)
+                //y 75%
+                //x 80%
+                //开始绘制标记
+                ctx.save()
+                ctx.translate(this.cvs.width * 0.1, this.cvs.height * 0.9)
+                    //开始绘制数据
+                ctx.beginPath()
+                ctx.moveTo(0, 0)
+                data.data && data.data.forEach(function(item, index) {
+                    var length = data.data.length
+                    var lineY = this.cvs.height * 0.75
+                    var lineX = this.cvs.width * 0.8
+                    if (!Object.is(Number(item), NaN)) {
+                        ctx.lineTo(lineX * index / (length - 1), -lineY * item / (data.yDataScope || 100))
+                    }
+                    console.log(item)
+                }, this)
+                ctx.lineTo(this.cvs.width * 0.8, 0)
+                ctx.strokeStyle = data.lineStyle && data.lineStyle.color || "#000"
+                    //ctx.fillStyle = 'rgba(0,0,255,0.5)'
+                var gradient = ctx.createLinearGradient(0, -this.cvs.height * 0.75, 0, 0)
+
+                gradient.addColorStop(1 / 4, 'red')
+                gradient.addColorStop(2 / 4, 'orange')
+                gradient.addColorStop(3 / 4, 'yellow')
+                gradient.addColorStop(4 / 4, 'green')
+                    //      gradient.addColorStop(4/7,'cyan')
+                    //      gradient.addColorStop(5/7,'blue')
+                    //      gradient.addColorStop(6/7,'purple')
+
+
+                ctx.fillStyle = gradient
+                ctx.lineWidth = data.lineStyle && data.lineStyle.width || 2
+                ctx.lineJoin = "round"
+                    //ctx.stroke()
+                ctx.fill()
+                ctx.strokeStyle = "rgba(0,0,0,0.1)"
+                ctx.lineWidth = 1
+                    //y标记
+                data.title && data.title.xTitle && data.title.xTitle.mark.forEach(function(item, index) {
+                        var length = data.title.xTitle.mark.length
+                        ctx.beginPath()
+                        ctx.textAlign = "right"
+                        ctx.fillText(item, -5, -this.cvs.height * 0.75 / (length - 1) * index)
+                        ctx.moveTo(0, -this.cvs.height * 0.75 / (length - 1) * index)
+                        ctx.lineTo(this.cvs.width * 0.8, -this.cvs.height * 0.75 / (length - 1) * index)
+                        ctx.stroke()
+                    }, this)
+                    //x标记
+                data.title && data.title.yTitle && data.title.yTitle.mark.forEach(function(item, index) {
+                    var length = data.title.yTitle.mark.length
+                    ctx.beginPath()
+                    ctx.textAlign = "left"
+                    ctx.fillText(item, this.cvs.width * 0.8 / (length - 1) * index - 8, 25)
+                    ctx.moveTo(this.cvs.width * 0.8 / (length - 1) * index, 0)
+                    ctx.lineTo(this.cvs.width * 0.8 / (length - 1) * index, -this.cvs.height * 0.8)
+                    ctx.stroke()
+                }, this)
+
+                //ctx.translate(-this.cvs.width * 0.1, -this.cvs.height * 0.9)
+                ctx.restore()
+            },
+            //扇形图
+            fanChart: function(data) {
+                var ctx = this.ctx
+                this.drawBigTitle(ctx, data)
+                ctx.translate(this.cvs.width / 2, this.cvs.height / 2)
+
+            },
+            drawBigTitle: function(ctx, data) {
+                ctx.textAlign = "left"
+                ctx.font = "30px 微软雅黑"
+                ctx.fillStyle = data.title && data.title.bigTitle && data.title.bigTitle.color || '#000'
+                ctx.fillText(data.title && data.title.bigTitle && data.title.bigTitle.text || "", this.cvs.width / 10, this.cvs.height / 10)
+            },
+            clear: function() {
+                this.ctx.clearRect(0, 0, this.cvs.width, this.cvs.height)
+            }
+        }
+
+
+    }(window)
 
 
 
-  new myEchars({
-    el: 'test',
-    type: 'lineChart',
-    lineStyle:{
-      color:"green",
-      width:1
-    },
-    data: {
-      title:{
-        bigTitle:{
-          color:'red',
-          text :'动态监视图'
+    new myEchars({
+        el: 'test',
+        type: 'lineChart',
+        //  type:'fanChart',
+        lineStyle: {
+            color: "green",
+            width: 1
         },
-        xTitle:{
-          color:"blue",
-          text:'成交量',
-          mark:[0,10,20,30,40,50,60,70,80,90,100]
-        },
-        yTitle:{
-          color:"blue",
-          text:'小时',
-          mark:[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24]
+        data: {
+            title: {
+                bigTitle: {
+                    color: 'red',
+                    text: '动态监视图'
+                },
+                xTitle: {
+                    color: "blue",
+                    text: '成交量',
+                    mark: [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
+                },
+                yTitle: {
+                    color: "blue",
+                    text: '小时',
+                    mark: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24]
+                }
+            },
+            lineStyle: {
+                color: "green",
+                width: 2
+            },
+            yDataScope: 100,
+            step: 10,
+            data: (function() {
+                var arr = []
+                for (var i = 0; i < 25; i++) {
+                    arr.push(i + Math.random() * 20 | 0)
+                }
+                return arr
+            })()
         }
-      },
-      lineStyle:{
-        color:"green",
-        width:2
-      },
-      yDataScope:100,
-      step: 10,
-      data:(function () {
-        var arr = []
-        for (var i = 0; i<200; i++){
-          arr.push(Math.random()*30+30|0)
-        }
-        return arr
-      })()
-    }
-  })
-
+    })
 </script>
 
 </html>
